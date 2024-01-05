@@ -1,44 +1,45 @@
-import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Footer from "../components/Footer/Footer";
-import { v4 } from "uuid";
-import { db } from "../firebase";
-
-const initialState = {
-  name: "",
-  email: "",
-  classes: "",
-  comment: "",
-};
+import emailjs from "@emailjs/browser";
 
 function Login() {
-  const colletionRef = collection(db, "users");
-  const [userDetails, setUserDetails] = useState(initialState);
+  const formRef = useRef();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
 
-  async function adduser() {
-    const newuser = {
-      ...userDetails,
-      id: v4(),
-      createdAt: serverTimestamp(),
-      lastUpdate: serverTimestamp(),
-    };
-
-    try {
-      const userRef = doc(colletionRef, newuser.id);
-      await setDoc(userRef, newuser);
-      console.log(newuser);
-      alert("Joined Successfully");
-      setUserDetails(initialState);
-    } catch (error) {
-      alert("plase register");
-      console.error(error);
-    }
-  }
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    adduser();
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({...form,[name]: value});
   };
+
+  
+  const handleSubmit = async(e)=>{
+    e.preventDefault();
+
+    emailjs.send('service_xbdynqf','template_d4mz79o',{
+    from_name: form.name,
+    to_name: "Priyansh Sharma",
+    from_email: form.email,
+    to_email: "poojagugawad@gmail.com",
+    message: form.message,
+   },
+   "0NWtSooi59ngEbFq7"
+   ).then(
+    () => {
+      alert("Thank you. I will get back to you as soon as possible.");
+      setForm({
+        name: "",
+        email: "",
+        message: "",
+      });
+    },
+    (error) => {
+      alert("Ahh, something went wrong. Please try again.");
+    })
+  }
 
   return (
     <>
@@ -104,6 +105,7 @@ Phone-no: +(91) 9980456064 //
 
           {/* second col ---*/}
           <form
+           ref={formRef}
             onSubmit={handleSubmit}
             className="flex flex-col pt-[30px] pr-[50px] pb-[50px] pl-[45px] bg-[#f8f8f8] relative md1000:w-[65%] md1000:flex md1000:flex-col md1000:mx-auto md1000:mt-14 min800:w-[90%] min620:w-full"
           >
@@ -111,29 +113,26 @@ Phone-no: +(91) 9980456064 //
             <span className="bg-[#ff0336] w-[50px] h-[4px] absolute top-[77px]"></span>
             <input
               className="w-full py-[12px] px-[20px] h-[51px] text-[14px] border border-solid border-[#e4e4e4] outline-none mb-8"
-              placeholder="Full Name *"
-              type="text"
-              value={userDetails.name}
-              onChange={(e) =>
-                setUserDetails({ ...userDetails, name: e.target.value })
-              }
-            ></input>
+              type='text'
+            name='name'
+            value={form.name}
+            onChange={handleChange}
+            placeholder="What's your good name?"
+            />
             <input
               className="w-full py-[12px] px-[20px] h-[51px] text-[14px] border border-solid border-[#e4e4e4] outline-none mb-8"
-              placeholder="Email Address *"
-              type="email"
-              value={userDetails.email}
-              onChange={(e) =>
-                setUserDetails({ ...userDetails, email: e.target.value })
-              }
-            ></input>
+              type='email'
+            name='email'
+            value={form.email}
+            onChange={handleChange}
+            placeholder="What's your web address?"
+            />
           
             <textarea
-              value={userDetails.comment}
-              onChange={(e) =>
-                setUserDetails({ ...userDetails, comment: e.target.value })
-              }
-              placeholder="Comment"
+             name='message'
+            value={form.message}
+            onChange={handleChange}
+            placeholder='What you want to say?'
               className="w-full py-[12px] px-[20px] h-[140px] text-[14px] border border-solid border-[#e4e4e4] outline-none mb-8"
             ></textarea>
             <button
