@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import Footer from "../components/Footer/Footer";
 import emailjs from "@emailjs/browser";
-
+import axios from 'axios'
 function Login() {
   const formRef = useRef();
   const [form, setForm] = useState({
@@ -18,27 +18,18 @@ function Login() {
   
   const handleSubmit = async(e)=>{
     e.preventDefault();
-
-    emailjs.send('service_xbdynqf','template_d4mz79o',{
-    from_name: form.name,
-    to_name: "Priyansh Sharma",
-    from_email: form.email,
-    to_email: "poojagugawad@gmail.com",
-    message: form.message,
-   },
-   "0NWtSooi59ngEbFq7"
-   ).then(
-    () => {
-      alert("Thank you. I will get back to you as soon as possible.");
-      setForm({
-        name: "",
-        email: "",
-        message: "",
-      });
-    },
-    (error) => {
-      alert("Ahh, something went wrong. Please try again.");
-    })
+    try {
+      const res = await axios.post("http://localhost:8080/contact/contact", form)
+      if(res.status===200){
+        setForm({
+          name: "",
+          email: "",
+          message: "",
+        });
+      }
+    } catch (error) {
+      alert(error.message)
+    }
   }
 
   return (
